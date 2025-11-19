@@ -1,0 +1,46 @@
+<?php
+// Database configuration - Gunakan define() dengan parameter ketiga untuk mencegah error
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'sql100.infinityfree.com');
+}
+if (!defined('DB_USER')) {
+    define('DB_USER', 'if0_40453464');
+}
+if (!defined('DB_PASS')) {
+    define('DB_PASS', 'Ccdccd12');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'if0_40453464_kios_kane');
+}
+
+try {
+    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    die("Koneksi gagal: " . $e->getMessage());
+}
+
+// Konfigurasi sesi - harus diatur SEBELUM session_start()
+if (session_status() === PHP_SESSION_NONE) {
+    // Set konfigurasi sesi
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_lifetime', 0); // Cookie akan hilang saat browser ditutup
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.cookie_secure', false); // Gunakan true jika menggunakan HTTPS
+    ini_set('session.cookie_samesite', 'Lax');
+    
+    // Mulai sesi
+    session_start();
+    
+    // Atur waktu sesi (1 jam)
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 3600)) {
+        session_destroy();
+        header('Location: login.php?timeout=1');
+        exit();
+    }
+    
+    // Update waktu aktivitas
+    $_SESSION['last_activity'] = time();
+}
+?>
