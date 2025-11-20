@@ -1,0 +1,25 @@
+INSERT INTO kios_kane.menu_items (id, name, category, price, description, created_at, updated_at) VALUES
+(1, 'Pizza Neapolitan', 'Pizza', 10.00, 'Traditional thin crust with San Marzano tomatoes, fresh mozzarella, and basil.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(2, 'Pizza Siciliana', 'Pizza', 11.00, 'Thick crust with anchovies, caciocavallo cheese, and wild fennel.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(3, 'Pizza Deep Dish', 'Pizza', 9.88, 'Chicago-style deep dish with layers of cheese, sauce, and your choice of toppings.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(4, 'Ichiraku Ramen', 'Ramen', 10.05, 'Naruto-inspired ramen with rich tonkotsu broth, chashu pork, and soft-boiled egg.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(5, 'Indomie', 'Ramen', 4.03, '', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(6, 'Kwetiau', 'Ramen', 3.04, 'Indonesian flat rice noodles stir-fried with prawns, bean sprouts, and soy sauce.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(7, 'Macarons', 'Dessert', 1.99, 'Delicate French almond meringue cookies with ganache filling in various flavors.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(8, 'Strawberry Cheesecake', 'Dessert', 5.99, 'Creamy New York-style cheesecake with fresh strawberry topping.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
+(9, 'Kahlúa Crème Caramel', 'Dessert', 3.99, 'Silky smooth caramel custard infused with Kahlúa coffee liqueur.', '2025-11-18 08:46:27', '2025-11-20 11:33:16');
+
+INSERT INTO kios_kane.transactions (id, order_id, customer_name, total_amount, payment_method, payment_status, transaction_date) VALUES
+(1, 'ORDER_20112025_691e94ef93cea', 'cioo', 18.99, 'qris', 'completed', '2025-11-20 11:11:27'),
+(2, 'ORDER_20112025_691e9acdd0fc8', 'Guest', 16.02, 'qris', 'completed', '2025-11-20 11:36:29');
+
+INSERT INTO kios_kane.transaction_items (id, transaction_id, item_id, item_name, item_category, item_price, quantity, total_price) VALUES
+(1, 1, 3, 'Pizza Deep Dish', 'Pizza', 9.88, 1, 18.99),
+(2, 2, 5, 'Indomie', 'Ramen', 4.03, 1, 4.03),
+(3, 2, 1, 'Pizza Neapolitan', 'Pizza', 10.00, 1, 10.00),
+(4, 2, 7, 'Macarons', 'Dessert', 1.99, 1, 1.99);
+
+INSERT INTO kios_kane.users (id, username, password, email, role, created_at, updated_at, phone, full_name) VALUES
+(1, 'admin', '$2y$10$KxAnPkEqaMCIZ2hVVVkFwugJwozW9TaWcsswzPHmcZE7hokRnsCZK', 'admin@kioskane.com', 'admin', '2025-11-18 08:46:27', '2025-11-19 14:02:58', NULL, NULL),
+(2, 'atmin', '12345678', 'atmin@kioskane.com', 'admin', '2025-11-18 10:48:49', '2025-11-18 10:48:49', NULL, NULL),
+(3, 'cioo', '$2y$10$bMZJLeMAwCDLC9Tk6hE51OXNDYxA6925D8MPicaMHaCoWiCBoxXz6', 'emal@gmail.com', 'customer', '2025-11-19 11:21:40', '2025-11-19 11:21:40', '0932018392184', 'cio');

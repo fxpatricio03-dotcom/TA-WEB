@@ -8,6 +8,14 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
+// Kurs USD ke IDR (bisa diubah sesuai kebutuhan)
+define('USD_TO_IDR_RATE', 15500);
+
+// Fungsi untuk konversi USD ke Rupiah
+function usd_to_idr($usd_amount) {
+    return $usd_amount * USD_TO_IDR_RATE;
+}
+
 function get_sales_statistics($pdo) {
     $stats = [];
     
@@ -36,24 +44,19 @@ function get_sales_statistics($pdo) {
 
 function get_recent_transactions($pdo, $limit = 10) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM transactions ORDER BY transaction_date DESC LIMIT ?");
-        $stmt->execute([$limit]);
+        $stmt = $pdo->query("SELECT * FROM transactions ORDER BY transaction_date DESC LIMIT " . (int)$limit);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        // Return empty array jika ada error
         return [];
     }
 }
 
 function get_top_items($pdo, $limit = 5) {
-    try {
-        $stmt = $pdo->prepare("SELECT item_name, item_category, SUM(quantity) as total_quantity, SUM(total_price) as total_revenue FROM transaction_items GROUP BY item_name, item_category ORDER BY total_quantity DESC LIMIT ?");
-        $stmt->execute([$limit]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // Return empty array jika ada error
-        return [];
-    }
+    // Gunakan LIMIT tanpa parameter untuk jumlah tetap
+    $sql = "SELECT item_name, item_category, SUM(quantity) as total_quantity, SUM(total_price) as total_revenue FROM transaction_items GROUP BY item_name, item_category ORDER BY total_quantity DESC LIMIT " . (int)$limit;
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function get_payment_statistics($pdo) {
@@ -81,25 +84,25 @@ $payment_stats = get_payment_statistics($pdo);
                 <div class="stats-cards">
                     <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
                         <h3 style="margin-bottom: 10px;">Hari Ini</h3>
-                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['today']['total_today'] ? number_format($stats['today']['total_today'], 0, ',', '.') : '0'; ?></p>
+                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['today']['total_today'] ? number_format(usd_to_idr($stats['today']['total_today']), 0, ',', '.') : '0'; ?></p>
                         <p><?php echo $stats['today']['orders_today'] ?? '0'; ?> Pesanan</p>
                     </div>
                     
                     <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
                         <h3 style="margin-bottom: 10px;">Minggu Ini</h3>
-                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['week']['total_week'] ? number_format($stats['week']['total_week'], 0, ',', '.') : '0'; ?></p>
+                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['week']['total_week'] ? number_format(usd_to_idr($stats['week']['total_week']), 0, ',', '.') : '0'; ?></p>
                         <p><?php echo $stats['week']['orders_week'] ?? '0'; ?> Pesanan</p>
                     </div>
                     
                     <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
                         <h3 style="margin-bottom: 10px;">Bulan Ini</h3>
-                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['month']['total_month'] ? number_format($stats['month']['total_month'], 0, ',', '.') : '0'; ?></p>
+                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['month']['total_month'] ? number_format(usd_to_idr($stats['month']['total_month']), 0, ',', '.') : '0'; ?></p>
                         <p><?php echo $stats['month']['orders_month'] ?? '0'; ?> Pesanan</p>
                     </div>
                     
                     <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
                         <h3 style="margin-bottom: 10px;">Total</h3>
-                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['all']['total_all'] ? number_format($stats['all']['total_all'], 0, ',', '.') : '0'; ?></p>
+                        <p style="font-size: 1.2em; font-weight: bold;">Rp <?php echo $stats['all']['total_all'] ? number_format(usd_to_idr($stats['all']['total_all']), 0, ',', '.') : '0'; ?></p>
                         <p><?php echo $stats['all']['orders_all'] ?? '0'; ?> Pesanan</p>
                     </div>
                 </div>
@@ -129,15 +132,21 @@ $payment_stats = get_payment_statistics($pdo);
                                     <tr style="border-bottom: 1px solid #eee;">
                                         <td style="padding: 12px;"><?php echo htmlspecialchars($transaction['order_id']); ?></td>
                                         <td style="padding: 12px;">
-                                            <?php echo htmlspecialchars($transaction['customer_name'] ?? 'Tamu'); ?>
+                                            <?php 
+                                            if (!empty($transaction['customer_name'])) {
+                                                echo htmlspecialchars($transaction['customer_name']);
+                                            } else {
+                                                echo 'Pelanggan';
+                                            }
+                                            ?>
                                             <?php if (empty($transaction['customer_name'])): ?>
-                                                <span style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Non-login</span>
+                                                <span style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">Non-login</span>
                                             <?php else: ?>
-                                                <span style="background: #27ae60; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Login</span>
+                                                <span style="background: #27ae60; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">Login</span>
                                             <?php endif; ?>
                                         </td>
                                         <td style="padding: 12px;"><?php echo htmlspecialchars(ucfirst($transaction['payment_method'])); ?></td>
-                                        <td style="padding: 12px; text-align: right;">Rp <?php echo number_format($transaction['total_amount'], 0, ',', '.'); ?></td>
+                                        <td style="padding: 12px; text-align: right;">Rp <?php echo number_format(usd_to_idr($transaction['total_amount']), 0, ',', '.'); ?></td>
                                         <td style="padding: 12px; text-align: center;">
                                             <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
                                                 <?php echo htmlspecialchars(ucfirst($transaction['payment_status'])); ?>
@@ -174,7 +183,7 @@ $payment_stats = get_payment_statistics($pdo);
                                         <td style="padding: 12px;"><?php echo htmlspecialchars($item['item_name']); ?></td>
                                         <td style="padding: 12px;"><?php echo htmlspecialchars($item['item_category']); ?></td>
                                         <td style="padding: 12px; text-align: center;"><?php echo $item['total_quantity']; ?></td>
-                                        <td style="padding: 12px; text-align: right;">Rp <?php echo number_format($item['total_revenue'], 0, ',', '.'); ?></td>
+                                        <td style="padding: 12px; text-align: right;">Rp <?php echo number_format(usd_to_idr($item['total_revenue']), 0, ',', '.'); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -187,15 +196,19 @@ $payment_stats = get_payment_statistics($pdo);
                 <div class="dashboard-section" style="margin-top: 30px;">
                     <h3>Statistik Metode Pembayaran</h3>
                     <div class="payment-stats" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 20px;">
-                        <?php foreach ($payment_stats as $stat): ?>
-                            <div style="flex: 1; min-width: 200px; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                                <h4 style="color: var(--secondary); margin-bottom: 10px;"><?php echo htmlspecialchars(ucfirst($stat['payment_method'])); ?></h4>
-                                <p style="font-size: 1.5em; font-weight: bold; color: var(--primary);"><?php echo $stat['count']; ?></p>
-                                <p style="color: #777;">Transaksi</p>
-                                <p style="font-size: 1.2em; font-weight: bold; margin-top: 10px;">Rp <?php echo number_format($stat['total'], 0, ',', '.'); ?></p>
-                                <p style="color: #777;">Total Pendapatan</p>
-                            </div>
-                        <?php endforeach; ?>
+                        <?php if (empty($payment_stats)): ?>
+                            <p style="text-align: center; color: #777; width: 100%;">Belum ada data pembayaran</p>
+                        <?php else: ?>
+                            <?php foreach ($payment_stats as $stat): ?>
+                                <div style="flex: 1; min-width: 200px; background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <h4 style="color: var(--secondary); margin-bottom: 10px;"><?php echo htmlspecialchars(ucfirst($stat['payment_method'])); ?></h4>
+                                    <p style="font-size: 1.5em; font-weight: bold; color: var(--primary);"><?php echo $stat['count']; ?></p>
+                                    <p style="color: #777;">Transaksi</p>
+                                    <p style="font-size: 1.2em; font-weight: bold; margin-top: 10px;">Rp <?php echo number_format(usd_to_idr($stat['total']), 0, ',', '.'); ?></p>
+                                    <p style="color: #777;">Total Pendapatan</p>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
