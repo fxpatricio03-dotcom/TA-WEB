@@ -7,7 +7,7 @@ INSERT INTO kios_kane.menu_items (id, name, category, price, description, create
 (6, 'Kwetiau', 'Ramen', 3.04, 'Indonesian flat rice noodles stir-fried with prawns, bean sprouts, and soy sauce.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
 (7, 'Macarons', 'Dessert', 1.99, 'Delicate French almond meringue cookies with ganache filling in various flavors.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
 (8, 'Strawberry Cheesecake', 'Dessert', 5.99, 'Creamy New York-style cheesecake with fresh strawberry topping.', '2025-11-18 08:46:27', '2025-11-20 11:33:16'),
-(9, 'Kahlúa Crème Caramel', 'Dessert', 3.99, 'Silky smooth caramel custard infused with Kahlúa coffee liqueur.', '2025-11-18 08:46:27', '2025-11-20 11:33:16');
+(9, 'Kahlua Creme Caramel', 'Dessert', 3.99, 'Silky smooth caramel custard infused with Kahlúa coffee liqueur.', '2025-11-18 08:46:27', '2025-11-20 11:33:16');
 
 INSERT INTO kios_kane.transactions (id, order_id, customer_name, total_amount, payment_method, payment_status, transaction_date) VALUES
 (1, 'ORDER_20112025_691e94ef93cea', 'cioo', 18.99, 'qris', 'completed', '2025-11-20 11:11:27'),
@@ -23,3 +23,48 @@ INSERT INTO kios_kane.users (id, username, password, email, role, created_at, up
 (1, 'admin', '$2y$10$KxAnPkEqaMCIZ2hVVVkFwugJwozW9TaWcsswzPHmcZE7hokRnsCZK', 'admin@kioskane.com', 'admin', '2025-11-18 08:46:27', '2025-11-19 14:02:58', NULL, NULL),
 (2, 'atmin', '12345678', 'atmin@kioskane.com', 'admin', '2025-11-18 10:48:49', '2025-11-18 10:48:49', NULL, NULL),
 (3, 'cioo', '$2y$10$bMZJLeMAwCDLC9Tk6hE51OXNDYxA6925D8MPicaMHaCoWiCBoxXz6', 'emal@gmail.com', 'customer', '2025-11-19 11:21:40', '2025-11-19 11:21:40', '0932018392184', 'cio');
+
+CREATE TABLE kios_kane.transaction_items (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    transaction_id INT NOT NULL,
+    item_id INT NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    item_category VARCHAR(100),
+    item_price DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    INDEX idx_transaction_id (transaction_id),
+    INDEX idx_item_id (item_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE kios_kane.menu_items (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE kios_kane.transactions (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(50) NOT NULL,
+    customer_name VARCHAR(100) DEFAULT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    payment_method ENUM('cash', 'credit_card', 'qris', 'transfer') NOT NULL,
+    payment_status ENUM('pending', 'completed', 'cancelled') DEFAULT 'pending',
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE kios_kane.users (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'staff', 'customer') DEFAULT 'customer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    phone VARCHAR(20) DEFAULT NULL,
+    full_name VARCHAR(150) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
