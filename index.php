@@ -32,7 +32,13 @@ include 'functions.php'; ?>
                     <div class="category-items">
                         <?php foreach ($items as $item): ?>
                         <div class="menu-item">
-                            <img src="https://images.unsplash.com/photo-<?php echo $category === 'Pizza' ? '1513104890138-7c749659a591' : ($category === 'Ramen' ? '1585036156171-384164a0ae38' : '1563729784474-d77dbb933a9e'); ?>?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="<?php echo htmlspecialchars($item['name']); ?>" class="item-image">
+                            <?php 
+                            // Ubah nama item menjadi nama file gambar (lowercase + .jpg)
+                            $image_filename = strtolower($item['name']) . '.jpg';
+                            $image_path = 'img/' . $image_filename;
+                            ?>
+                            <img src="<?php echo $image_path; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="item-image" onerror="this.src='https://images.unsplash.com/photo-<?php echo $category === 'Pizza' ? '1513104890138-7c749659a591' : ($category === 'Ramen' ? '1585036156171-384164a0ae38' : '1563729784474-d77dbb933a9e'); ?>?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+
                             <div class="item-details">
                                 <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>
                                 <div class="item-price">Rp <?php echo number_format($item['price'] * 15000, 0, ',', '.'); ?></div>

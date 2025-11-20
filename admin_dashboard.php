@@ -141,7 +141,7 @@ $payment_stats = get_payment_statistics($pdo);
                                             ?>
                                             <?php if (empty($transaction['customer_name'])): ?>
                                                 <span style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">Non-login</span>
-                                            <?php else: ?>
+                                            <?php elseif (strtolower($transaction['customer_name']) !== 'guest'): ?>
                                                 <span style="background: #27ae60; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 5px;">Login</span>
                                             <?php endif; ?>
                                         </td>
